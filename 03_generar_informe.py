@@ -24,7 +24,13 @@ SALIDA = "Informe_Laboratorio4_Cianobacteria.pdf"
 RUTA_FUENTE = r"C:\Windows\Fonts\times.ttf"
 FAMILIA = "TimesNewRoman"
 
-INTEGRANTES = "Integrantes: Rodrigo Ajmac (22279), Andrés Mazariegos (21749), June Herrera (231038)"
+INTEGRANTES = [
+    "Rodrigo Ajmac, 22279",
+    "Andrés Mazariegos, 21749",
+    "June Herrera, 231038",
+]
+LOGO = "images.png"
+FECHA_ENTREGA = "Guatemala, 16 de agosto de 2026"
 
 # Resultados del mapa de persistencia (sección 8.2 del notebook 02_ANALISIS_LAB4.ipynb).
 PERSISTENCIA = {
@@ -80,10 +86,12 @@ class Informe(FPDF):
         pass
 
     def footer(self):
+        if self.page_no() == 1:  # la carátula no se numera
+            return
         self.set_y(-15)
         self.set_font(FAMILIA, size=12)
         self.set_text_color(0, 0, 0)
-        self.cell(0, 8, str(self.page_no()), align="C")
+        self.cell(0, 8, str(self.page_no() - 1), align="C")
 
 
 pdf = Informe(orientation="P", unit="mm", format="A4")
@@ -164,19 +172,42 @@ def figura(nombre, pie, ancho=150):
 
 
 # ---------------------------------------------------------------------------
-# Portada y presentación
+# Carátula
 # ---------------------------------------------------------------------------
-linea("Universidad del Valle de Guatemala")
-linea("Facultad de Ingeniería")
-linea("Departamento de Ciencias de la Computación")
-linea("CC3084 Data Science, Semestre II 2026")
-pdf.ln(8)
-linea("Laboratorio 4. Análisis de datos geoespaciales")
-linea("Monitoreo de cianobacteria en los lagos de Atitlán y Amatitlán con imágenes")
-linea("del satélite Sentinel-2")
-pdf.ln(8)
-linea(INTEGRANTES)
-pdf.ln(10)
+def centrado(texto):
+    pdf.set_font(FAMILIA, size=12)
+    pdf.multi_cell(0, ALTO_LINEA, texto, align="C", new_x="LMARGIN", new_y="NEXT")
+
+
+ANCHO_LOGO = 42
+with Image.open(LOGO) as _logo:
+    pdf.image(LOGO, x=(pdf.w - ANCHO_LOGO) / 2, y=30, w=ANCHO_LOGO)
+    pdf.set_y(30 + ANCHO_LOGO * _logo.height / _logo.width + 14)
+
+centrado("Universidad del Valle de Guatemala")
+centrado("Facultad de Ingeniería")
+centrado("Departamento de Ciencias de la Computación")
+centrado("CC3084 Data Science, Semestre II 2026")
+pdf.ln(20)
+
+centrado("Laboratorio 4. Análisis de datos geoespaciales")
+pdf.ln(4)
+centrado("Monitoreo de cianobacteria en los lagos de Atitlán y Amatitlán")
+centrado("con imágenes del satélite Sentinel-2")
+pdf.ln(24)
+
+centrado("Integrantes")
+pdf.ln(2)
+for integrante in INTEGRANTES:
+    centrado(integrante)
+pdf.ln(20)
+
+centrado(FECHA_ENTREGA)
+
+# ---------------------------------------------------------------------------
+# Cuerpo del informe
+# ---------------------------------------------------------------------------
+pdf.add_page()
 
 titulo("Resumen", espacio_antes=0)
 parrafo(
